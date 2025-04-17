@@ -1,13 +1,39 @@
 import React, {useState, useEffect, useContext, createContext} from 'react';
 import {useAddress, useContract, useMetamask, useContractWrite
-    , useContractRead, useContractEvents
+    , useContractRead, useContractEvents, getContract,
 } from "@thirdweb-dev/react"
+import  RealEstateABI  from "./RealEstateABI.json";
+// import { defineChain } from "thirdweb/chains";
+
 import {ethers} from "ethers";
 
 const StateContext = createContext();
 
 export const StateContextProvider = ({children}) =>{
-    const {contract} = useContract("");
+
+    
+// const client = createThirdwebClient({
+//     // use clientId for client side usage
+//     clientId: "9c3aeddf2491d88c58b283f931a63aa1",
+//     // use secretKey for server side usage
+//     secretKey: "nuo...wmzg", // replace this with full secret key
+//   });
+    // const client = createThirdwebClient({
+    // clientId: "9c3aeddf2491d88c58b283f931a63aa1",
+    // });
+    //  const contract = getContract({
+    //     client,
+    //     chain: defineChain(11155111),
+    //     address: "0xBC13A93A5EEc494b0fC047323bDe6638C00FC49F",
+    //   });
+   
+    const { contract } = useContract(
+        "0xBC13A93A5EEc494b0fC047323bDe6638C00FC49F", 
+        RealEstateABI.abi // The pasted ABI array
+      );
+      
+        
+    
     const address = useAddress();
     const connect = useMetamask();
     const realEstate= "Real estate dapp"
@@ -86,7 +112,7 @@ const {mutateAsync: updatePrice, isLoading: updatePriceLoading} = useContractWri
     const updatePriceFunction = async(form)=>{
         const {productId,price} = form;
         try {
-            const data=await updatePrice([address, productId, price])
+            const data = await updatePrice([address, productId, price])
 
             console.log("transaction successful", data)
         } catch (error) {
@@ -111,12 +137,25 @@ const {mutateAsync: updatePrice, isLoading: updatePriceLoading} = useContractWri
                 address: property.propertyAddress
             }));
             console.log(properties)
+            console.log("parser",parsedProperties)
             return parsedProperties;
            
         } catch (error) {
             console.log("error " , error)
         }
     }
+
+    useEffect(()=>{
+        const fetchCont= async()=>{
+            const cont= await contract;
+           
+            getPropertiesData();
+            console.log("es", RealEstateABI)
+            console.log(Array.isArray(RealEstateABI.abi));
+            console.log("contract", cont)
+        }
+       fetchCont();
+    })
 
     return (
         <StateContext.Provider value={{address , connect
